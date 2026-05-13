@@ -1,0 +1,10 @@
+FROM alpine:3.23
+
+RUN apk add --no-cache curl git bats
+ARG ZIG_ARCH=aarch64
+RUN curl -L -o /tmp/zig.tar.xz https://ziglang.org/download/0.15.2/zig-${ZIG_ARCH}-linux-0.15.2.tar.xz \
+ && tar -xJf /tmp/zig.tar.xz -C /opt \
+ && ln -s /opt/zig-${ZIG_ARCH}-linux-0.15.2/zig /usr/local/bin/zig \
+ && rm /tmp/zig.tar.xz
+
+WORKDIR /app
