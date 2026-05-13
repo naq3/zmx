@@ -1,0 +1,47 @@
+version: "3"
+## =========================================================
+## NOTE:
+## [2026/05] Fork into naq3/zmx
+## - Main stream không build sẵn binary (latest) để download.
+## - Fork --> manual build.
+## - RELEASE:
+## git tag v0.5.2
+## git push origin v0.5.2
+## =========================================================
+
+tasks:
+  default:
+    cmds:
+      - task --list-all
+  ## ===================================
+  ## Build base image for builder
+  ## - task builder-img-build
+  builder-img-build:
+    cmds:
+      - docker buildx create --use --name multiarch 2>/dev/null || true
+      - |
+        docker buildx build \
+          -f Dockerfile.build \
+          -t vegacandle/zig-builder:0.15.2 \
+          --platform linux/amd64,linux/arm64 \
+          --push \
+          .
+  builder-img-push:
+    cmds:
+      - echo "Image đã được push trong builder-img-build (buildx --push)"
+  builder-img-test:
+    cmds:
+      - docker run --rm -it -v "$(pwd)":/app alpine:3.23 sh
+  ## ===================================
+  local-build:
+    cmds:
+      - docker run --rm -it -v "$(pwd)":/app vegacandle/zig-builder:0.15.2 sh -c "zig build -Doptimize=ReleaseSafe -Dtarget=aarch64-macos"
+  local-download:
+    dir: /tmp
+    cmds:
+      # - cd /tmp
+      # - curl -L -o zmx-0.5.2-macos-aarch64.tar.gz https://github.com/naq3/zmx/releases/download/v0.5.2/zmx-0.5.2-macos-aarch64.tar.gz
+      # - tar -xvzf zmx-0.5.2-macos-aarch64.tar.gz
+      # - ./zmx --version
+      # - mv zmx /usr/local/bin/zmx
+  ## ===================================
